@@ -1,6 +1,11 @@
+import kotlin.concurrent.thread
+
 fun main() {
     val stratSummaries = mutableListOf<StratGameSummary>()
+        val threads = mutableListOf<Thread>()
+
     for (strat in ACTIVE_STRATS) {
+            val thread = thread {
         println("Playing games with ${strat.name} strategy")
         val stratGames = mutableListOf<DiceGame>()
         for (gameNr in 1..GAMES_PLAYED) {
@@ -8,8 +13,15 @@ fun main() {
             game.playGame()
             stratGames += game
         }
-        stratSummaries.add(summaryOf(stratGames, strat))
+                val summary = summaryOf(stratGames, strat)
+                synchronized(stratSummaries) {
+                    stratSummaries.add(summary)
+                }
     }
+            threads.add(thread)
+        }
+
+        threads.forEach { it.join() }
     println(stratSummaries)
     stratSummaries.forEach { it.saveToCsv() }
 }

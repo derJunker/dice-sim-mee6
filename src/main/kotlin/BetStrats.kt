@@ -11,7 +11,8 @@ private class PercentageBettingStrategy(
 )
 
 val FIFTY_PERC_STRAT: BettingStrategy = PercentageBettingStrategy(0.5)
+val THIRTY_PERC_STRAT: BettingStrategy = PercentageBettingStrategy(0.3)
 val FIVE_PERC_STRAT: BettingStrategy = PercentageBettingStrategy(0.05)
 val TWO_PERC_STRAT: BettingStrategy = PercentageBettingStrategy(0.02)
 
-val ACTIVE_STRATS: List<BettingStrategy> = listOf(FIFTY_PERC_STRAT, TWO_PERC_STRAT)
+val ACTIVE_STRATS: List<BettingStrategy> = listOf(FIFTY_PERC_STRAT, THIRTY_PERC_STRAT, FIVE_PERC_STRAT, TWO_PERC_STRAT)

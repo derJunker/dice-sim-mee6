@@ -42,6 +42,26 @@ data class StratGameSummary(
         )
         println("Saved summary for $stratName to $OUTCOME_CSV_PATH")
     }
+
+    companion object {
+        const val OUTCOME_CSV_PATH = "./data/outcomes${MAX_ROUNDS}x$GAMES_PLAYED.csv"
+        fun loadFromCsv(): List<StratGameSummary> {
+            val file = File(OUTCOME_CSV_PATH)
+            if (!file.exists()) return emptyList()
+            return file.readLines().drop(1).map { line ->
+                val parts = line.split(Regex(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)"))
+                StratGameSummary(
+                    parts[0],
+                    parts[1].removeSurrounding("\"").split(",").map { it.toDouble() },
+                    parts[2].removeSurrounding("\"").split(",").map { it.toDouble() },
+                    parts[3].toDouble(),
+                    parts[4].toDouble(),
+                    parts[5].toInt(),
+                    parts[6].toInt()
+                )
+            }
+        }
+    }
 }
 
 fun summaryOf(games: List<DiceGame>, strat: BettingStrategy): StratGameSummary {
