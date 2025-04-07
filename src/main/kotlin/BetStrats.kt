@@ -10,9 +10,11 @@ private class PercentageBettingStrategy(
     { _, coinHistory -> (((coinHistory.last()-200) * percentage)+200).toInt() }
 )
 
-val FIFTY_PERC_STRAT: BettingStrategy = PercentageBettingStrategy(0.5)
-val THIRTY_PERC_STRAT: BettingStrategy = PercentageBettingStrategy(0.3)
-val FIVE_PERC_STRAT: BettingStrategy = PercentageBettingStrategy(0.05)
-val TWO_PERC_STRAT: BettingStrategy = PercentageBettingStrategy(0.02)
 
-val ACTIVE_STRATS: List<BettingStrategy> = listOf(FIFTY_PERC_STRAT, THIRTY_PERC_STRAT, FIVE_PERC_STRAT, TWO_PERC_STRAT)
+val ACTIVE_STRATS: List<BettingStrategy> = listOf(PercentageBettingStrategy(0.5),
+    PercentageBettingStrategy(0.3),
+    PercentageBettingStrategy(0.05),
+    PercentageBettingStrategy(0.02),
+    PercentageBettingStrategy(0.035),
+    PercentageBettingStrategy(0.1)
+)

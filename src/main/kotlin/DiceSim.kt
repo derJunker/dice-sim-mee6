@@ -6,7 +6,6 @@ fun main() {
 
     for (strat in ACTIVE_STRATS) {
             val thread = thread {
-        println("Playing games with ${strat.name} strategy")
         val stratGames = mutableListOf<DiceGame>()
         for (gameNr in 1..GAMES_PLAYED) {
             val game = DiceGame(MAX_ROUNDS, strat)

@@ -2,12 +2,12 @@ import java.io.File
 
 data class StratGameSummary(
     val stratName : String,
-    val averageCoinHistory: List<Double>,
-    val coinHistoryVariance: List<Double>,
     val overallVariance: Double,
     val completionPercentage: Double,
     val averageCompletionRound: Int,
-    val averageNonCompletionValue: Int
+    val averageNonCompletionValue: Int,
+    val averageCoinHistory: List<Double>,
+    val coinHistoryVariance: List<Double>
 ) {
     override fun toString(): String {
         return """
@@ -25,39 +25,38 @@ data class StratGameSummary(
         val file = File(OUTCOME_CSV_PATH).apply { parentFile.mkdirs(); createNewFile() }
         val existingLines = if (file.exists()) file.readLines().filterNot { it.startsWith("$stratName,") } else emptyList()
         if (existingLines.isEmpty()) {
-            val header = "stratName,averageCoinHistory,coinHistoryVariance,overallVariance,completionPercentage," +
-                    "averageCompletionRound,averageNonCompletionValue\n"
+            val header = "stratName,overallVariance,completionPercentage,averageCompletionRound,averageNonCompletionValue," +
+                    "averageCoinHistory,coinHistoryVariance\n"
             file.writeText(header)
         } else {
             file.writeText(existingLines.joinToString ("\n") + "\n")
         }
         file.appendText(
             "$stratName," +
-                    "\"${averageCoinHistory.joinToString(",")}\"," +
-                    "\"${coinHistoryVariance.joinToString(",")}\"," +
                     "$overallVariance, " +
                     "$completionPercentage, " +
                     "$averageCompletionRound, " +
-                    "$averageNonCompletionValue\n"
+                    "$averageNonCompletionValue, " +
+                    "\"${averageCoinHistory.joinToString(",")}\"," +
+                    "\"${coinHistoryVariance.joinToString(",")}\"\n"
         )
         println("Saved summary for $stratName to $OUTCOME_CSV_PATH")
     }
 
     companion object {
-        const val OUTCOME_CSV_PATH = "./data/outcomes${MAX_ROUNDS}x$GAMES_PLAYED.csv"
         fun loadFromCsv(): List<StratGameSummary> {
             val file = File(OUTCOME_CSV_PATH)
             if (!file.exists()) return emptyList()
             return file.readLines().drop(1).map { line ->
                 val parts = line.split(Regex(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)"))
                 StratGameSummary(
-                    parts[0],
-                    parts[1].removeSurrounding("\"").split(",").map { it.toDouble() },
-                    parts[2].removeSurrounding("\"").split(",").map { it.toDouble() },
-                    parts[3].toDouble(),
-                    parts[4].toDouble(),
-                    parts[5].toInt(),
-                    parts[6].toInt()
+                    parts[0].trim(),
+                    parts[1].trim().toDouble(),
+                    parts[2].trim().toDouble(),
+                    parts[3].trim().toInt(),
+                    parts[4].trim().toInt(),
+                    parts[5].trim().removeSurrounding("\"").split(",").map { it.toDouble() },
+                    parts[6].trim().removeSurrounding("\"").split(",").map { it.toDouble() },
                 )
             }
         }
@@ -94,11 +93,11 @@ fun summaryOf(games: List<DiceGame>, strat: BettingStrategy): StratGameSummary {
         .average()
     return StratGameSummary(
         stratName,
-        averageCoinHistory,
-        coinHistoryVariance,
         overallVariance,
         completionPercentage,
         averageCompletionRound.toInt(),
-        averageNonCompletionValue.toInt()
+        averageNonCompletionValue.toInt(),
+        averageCoinHistory,
+        coinHistoryVariance,
     )
 }
