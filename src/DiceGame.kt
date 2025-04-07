@@ -2,6 +2,7 @@ import java.util.*
 
 class DiceGame(
     private val maxRounds: Int,
+    private val bettingStrat: BettingStrategy
 ) {
     var coins: Int = COIN_START
     var coinHistory = mutableListOf<Int>()
@@ -39,7 +40,7 @@ class DiceGame(
     private fun playRound() {
         val diceRolls = doubleDiceRoll()
         val outcome = determineOutcome(diceRolls)
-        val betSize = (coins * 0.02).toInt()
+        val betSize = bettingStrat.getBetSize(resultHistory, coinHistory)
         coins = when (outcome) {
             DiceRollOutcome.LOSS -> coins - betSize
             DiceRollOutcome.DRAW -> coins
@@ -47,14 +48,15 @@ class DiceGame(
             DiceRollOutcome.DOUBLE -> coins + (betSize * 2)
             DiceRollOutcome.TRIPLE -> coins + (betSize * 3)
         }
-        coinHistory.add(coins)
         resultHistory.add(outcome)
     }
 
     fun playGame() {
         for (round in 1..maxRounds) {
             coins += 200;
-            if (coins > COIN_LIMIT) {
+            coinHistory.add(coins)
+            if (coins >= COIN_LIMIT) {
+                coins = COIN_LIMIT
                 endRound = round
                 return
             }

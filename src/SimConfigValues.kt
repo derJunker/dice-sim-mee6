@@ -1,4 +1,5 @@
-const val MAX_ROUNDS = 2000
+const val MAX_ROUNDS = 10
 const val COIN_LIMIT = 1000000000
 const val COIN_START = 1000
-const val GAMES_PLAYED = 50
+const val GAMES_PLAYED = 5
+const val OUTCOME_CSV_PATH = "./data/outcomes${MAX_ROUNDS}x$GAMES_PLAYED.csv"
