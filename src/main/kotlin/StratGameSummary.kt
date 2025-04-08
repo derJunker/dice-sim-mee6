@@ -5,6 +5,7 @@ data class StratGameSummary(
     val overallVariance: Double,
     val completionPercentage: Double,
     val averageCompletionRound: Int,
+    val completionRoundVariance: Double,
     val averageNonCompletionValue: Int,
     val averageCoinHistory: List<Double>,
     val coinHistoryVariance: List<Double>
@@ -16,6 +17,7 @@ data class StratGameSummary(
                 overallVariance=$overallVariance,
                 completionPercentage=${"%.2f".format(completionPercentage * 100)}%,
                 averageCompletionRound=$averageCompletionRound,
+                completionRoundVariance=$completionRoundVariance,
                 averageNonCompletionValue=$averageNonCompletionValue,
             )
         """.trimIndent()
@@ -25,7 +27,8 @@ data class StratGameSummary(
         val file = File(OUTCOME_CSV_PATH).apply { parentFile.mkdirs(); createNewFile() }
         val existingLines = if (file.exists()) file.readLines().filterNot { it.startsWith("$stratName,") } else emptyList()
         if (existingLines.isEmpty()) {
-            val header = "stratName,overallVariance,completionPercentage,averageCompletionRound,averageNonCompletionValue," +
+            val header = "stratName,overallVariance,completionPercentage,averageCompletionRound," +
+                    "completionRoundVariance,averageNonCompletionValue," +
                     "averageCoinHistory,coinHistoryVariance\n"
             file.writeText(header)
         } else {
@@ -36,6 +39,7 @@ data class StratGameSummary(
                     "$overallVariance, " +
                     "$completionPercentage, " +
                     "$averageCompletionRound, " +
+                    "$completionRoundVariance, " +
                     "$averageNonCompletionValue, " +
                     "\"${averageCoinHistory.joinToString(",")}\"," +
                     "\"${coinHistoryVariance.joinToString(",")}\"\n"
@@ -54,9 +58,10 @@ data class StratGameSummary(
                     parts[1].trim().toDouble(),
                     parts[2].trim().toDouble(),
                     parts[3].trim().toInt(),
-                    parts[4].trim().toInt(),
-                    parts[5].trim().removeSurrounding("\"").split(",").map { it.toDouble() },
+                    parts[4].trim().toDouble(),
+                    parts[5].trim().toInt(),
                     parts[6].trim().removeSurrounding("\"").split(",").map { it.toDouble() },
+                    parts[7].trim().removeSurrounding("\"").split(",").map { it.toDouble() },
                 )
             }
         }
@@ -82,10 +87,15 @@ fun summaryOf(games: List<DiceGame>, strat: BettingStrategy): StratGameSummary {
             .average()
     }
     val overallVariance = coinHistoryVariance.reduce { acc, variance -> acc + variance } / coinHistoryVariance.size
-    val completionPercentage =(games.count { it.coins >= COIN_LIMIT }) / (games.size.toDouble())
-    val averageCompletionRound = games
+
+    val completedRounds = games
         .filter { it.coins >= COIN_LIMIT }
         .map { it.endRound }
+
+    val completionPercentage = completedRounds.size / games.size.toDouble()
+    val averageCompletionRound = completedRounds.average()
+    val completionRoundVariance = completedRounds
+        .map { (it - averageCompletionRound) * (it - averageCompletionRound) }
         .average()
     val averageNonCompletionValue = games
         .filter { it.coins < COIN_LIMIT }
@@ -96,6 +106,7 @@ fun summaryOf(games: List<DiceGame>, strat: BettingStrategy): StratGameSummary {
         overallVariance,
         completionPercentage,
         averageCompletionRound.toInt(),
+        completionRoundVariance,
         averageNonCompletionValue.toInt(),
         averageCoinHistory,
         coinHistoryVariance,

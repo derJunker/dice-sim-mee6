@@ -1,4 +1,5 @@
 import java.util.*
+import kotlin.math.min
 
 class DiceGame(
     private val maxRounds: Int,
@@ -40,7 +41,7 @@ class DiceGame(
     private fun playRound() {
         val diceRolls = doubleDiceRoll()
         val outcome = determineOutcome(diceRolls)
-        val betSize = bettingStrat.getBetSize(resultHistory, coinHistory)
+        val betSize = min(bettingStrat.getBetSize(resultHistory, coinHistory), coins)
         coins = when (outcome) {
             DiceRollOutcome.LOSS -> coins - betSize
             DiceRollOutcome.DRAW -> coins

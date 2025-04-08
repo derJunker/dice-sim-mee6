@@ -5,22 +5,16 @@ fun main() {
         val threads = mutableListOf<Thread>()
 
     for (strat in ACTIVE_STRATS) {
-            val thread = thread {
-        val stratGames = mutableListOf<DiceGame>()
-        for (gameNr in 1..GAMES_PLAYED) {
-            val game = DiceGame(MAX_ROUNDS, strat)
-            game.playGame()
-            stratGames += game
+        val thread = thread {
+            val summary = strat.playGames()
+            synchronized(stratSummaries) {
+                stratSummaries.add(summary)
+            }
         }
-                val summary = summaryOf(stratGames, strat)
-                synchronized(stratSummaries) {
-                    stratSummaries.add(summary)
-                }
+        threads.add(thread)
     }
-            threads.add(thread)
-        }
 
-        threads.forEach { it.join() }
+    threads.forEach { it.join() }
     println(stratSummaries)
     stratSummaries.forEach { it.saveToCsv() }
 }
